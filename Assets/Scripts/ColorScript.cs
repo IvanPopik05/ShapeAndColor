@@ -11,4 +11,9 @@ public class ColorScript : MonoBehaviour
     {
         return colors[counter++];
     }
+    public Color RandomColor() 
+    {
+        int randColor = Random.Range(0,colors.Length);
+        return colors[randColor];
+    }
 }

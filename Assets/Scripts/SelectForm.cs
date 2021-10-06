@@ -5,40 +5,50 @@ using UnityEngine.UI;
 
 public class SelectForm : MonoBehaviour
 {
+    [SerializeField] private MessagePanel messagePanel;
     [SerializeField] private SpriteRenderer main_sprite;
     [Header("Data")]
     public DataFigure[] dataFigures;
     private DataFigure spriteData;
 
     private bool isActive = false;
-    private List<Sprite> allSprites = new List<Sprite>();
     private Animator main_sprite_anim;
 
     LevelNext _levelNext;
+    ColorScript _mainColor;
     private int counter = 0;
+
+    private const int maxLevel = 7;
+    private const int amountLevelData = 2;
 
     private void Awake()
     {
         main_sprite_anim = main_sprite.GetComponent<Animator>();
         _levelNext = GetComponent<LevelNext>();
+        _mainColor = GetComponent<ColorScript>();
     }
     private void Start()
     {
         Initialize();
     }
 
+    private void RandomTypeFigure() 
+    {
+        messagePanel.TypeFigure = (TypeFigure)Random.Range(0,2);
+    }
     private void SetDataFigure() 
     {
-        spriteData = dataFigures[_levelNext.Level - 2];
+        spriteData = dataFigures[_levelNext.Level - amountLevelData];
     }
     private void SetNewSprite(SpriteRenderer sprite) 
     {
         sprite.sprite = RandomSprites(GetSprites());
-        allSprites.Add(sprite.sprite);
+        sprite.color = _mainColor.RandomColor();
+        ArrayOfShapes.AddElements(main_sprite);
     }
     private void Initialize() 
     {
-        allSprites.Add(main_sprite.sprite);
+        ArrayOfShapes.AddElements(main_sprite);
         SetDataFigure();
         ChangeCards();
     }
@@ -59,34 +69,41 @@ public class SelectForm : MonoBehaviour
         SetNewSprite(main_sprite);
         ActiveAnim(false,true);
     }
-    private bool isSprite(int level) 
-    {
-        return allSprites[allSprites.Count - level] == main_sprite.sprite;
-    }
     private void Won() 
     {
         Debug.Log("Вы угадали");
+        RandomTypeFigure();
+        messagePanel.SelectMessage();
         counter++;
-        if (counter >= 10) 
+        if(ArrayOfShapes.AllSprites.Count > maxLevel || ArrayOfShapes.AllColors.Count > maxLevel)
+            ArrayOfShapes.RemoveElements();
+        if (counter >= maxLevel) 
         {
             StartCoroutine(_levelNext.ShowLevelPanel(0,140));
             _levelNext.LevelNextMethod();
-            main_sprite.color = _levelNext.GetColorWithText();
             counter = 0;
             SetDataFigure();
         }
         ChangeCards();
+    }
+
+    private bool TypeFormOrColor() 
+    {
+        switch (messagePanel.TypeFigure)
+        {
+            case TypeFigure.Form:
+                return ArrayOfShapes.IsSprite(_levelNext.Level,main_sprite);
+            case TypeFigure.Color:
+                return ArrayOfShapes.IsColor(_levelNext.Level,main_sprite);
+        }
+        return true;
     }
     public void SelectBtn(int numberBtn) 
     {
         bool isEven;
         isEven = numberBtn == 1 ? true : false;
         isActive = !isActive;
-        if (isSprite(_levelNext.Level) && isEven)
-        {
-            Won();
-        }
-        else if (!isSprite(_levelNext.Level) && !isEven)
+        if ((TypeFormOrColor() && isEven) || (!TypeFormOrColor() && !isEven))
         {
             Won();
         }
@@ -95,7 +112,6 @@ public class SelectForm : MonoBehaviour
             Debug.Log("Вы не угадали");
             Repeat();
         }
-
     }
     private void Repeat() 
     {
