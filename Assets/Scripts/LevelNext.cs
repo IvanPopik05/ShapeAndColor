@@ -2,14 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+/* #refactor
+ * 1. Для начала чуть-чуть смущает, что данный скрипт закреплен за объектом Main, а не за LevelPanel, например.
+ * Просто по своей логике он отвечает только за текст "Новый уровень". Поэтому лучше его держать там
+ * 2. Думаю лучше переменную level перевести в контроллер игры (GameController) или DataController. Иначе получается разброс данных
+ * 
+ * В общем, пусть LevelNext отвечает только за текст "Новый уровень"  и т.п. и анимацию. А остальное вынести в другое место 
+ */
 public class LevelNext : MonoBehaviour
 {
     [SerializeField] private GameObject levelPanel;
     [SerializeField] private Text showLevelText;
     [SerializeField] private Text meetLevelText;
     [SerializeField] int level = 2;
-    [SerializeField] float timer;
+    [SerializeField] float timer; //#refactor . Название более уточненное лучше. То есть, не совсем ясно, что за таймер.
 
     ColorScript _mainColor;
 
@@ -47,7 +53,10 @@ public class LevelNext : MonoBehaviour
     {
         Color startColor = Color.black;
         Color endColor = Color.clear;
-        showLevelText.color = _mainColor.GetColor(); 
+        showLevelText.color = _mainColor.GetColor();
+
+        //#refactor Не пойму эту конструкцию)
+        //Мы вроде пользуемся Time.deltaTime. Но там же и WaitForSeconds. Переменная t будет получаеть странные значения ведь)
         float t = 0;
         while (t < 1)
         {

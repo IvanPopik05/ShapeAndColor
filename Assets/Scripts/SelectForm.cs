@@ -19,7 +19,7 @@ public class SelectForm : MonoBehaviour
     private int counter = 0;
 
     private const int maxLevel = 7;
-    private const int amountLevelData = 2;
+    private const int amountLevelData = 2; //#refactor Я бы назвал "levelStepsBack" или просто "stepsBack"
 
     private void Awake()
     {
@@ -50,25 +50,46 @@ public class SelectForm : MonoBehaviour
     {
         ArrayOfShapes.AddElements(main_sprite);
         SetDataFigure();
-        ChangeCards();
+        ChangeCard();
     }
 
-    private void ChangeCards() 
+    //#refactored
+    //new
+    private void ChangeCard()
+        => StartCoroutine(ChangeCardCoroutine());
+    private IEnumerator ChangeCardCoroutine()
     {
-        StartCoroutine(CoroutineAnim());
-    }
-    private void ActiveAnim(bool isHide, bool isShow) 
-    {
-        main_sprite_anim.SetBool("Hide",isHide);
-        main_sprite_anim.SetBool("Show",isShow);
-    }
-    private IEnumerator CoroutineAnim() 
-    {
-        ActiveAnim(true,false);
+        CardAnim(true, false);
+
         yield return new WaitForSeconds(2);
+
         SetNewSprite(main_sprite);
-        ActiveAnim(false,true);
+
+        CardAnim(false, true);
     }
+    private void CardAnim(bool isHide, bool isShow)
+    {
+        main_sprite_anim.SetBool("Hide", isHide);
+        main_sprite_anim.SetBool("Show", isShow);
+    }
+
+    //old
+    //private void ChangeCards() 
+    //{
+    //    StartCoroutine(CoroutineAnim());
+    //}
+    //private void ActiveAnim(bool isHide, bool isShow) 
+    //{
+    //    main_sprite_anim.SetBool("Hide",isHide);
+    //    main_sprite_anim.SetBool("Show",isShow);
+    //}
+    //private IEnumerator CoroutineAnim() 
+    //{
+    //    ActiveAnim(true,false);
+    //    yield return new WaitForSeconds(2);
+    //    SetNewSprite(main_sprite);
+    //    ActiveAnim(false,true);
+    //}
     private void Won() 
     {
         Debug.Log("Вы угадали");
@@ -84,7 +105,7 @@ public class SelectForm : MonoBehaviour
             counter = 0;
             SetDataFigure();
         }
-        ChangeCards();
+        ChangeCard();
     }
 
     private bool TypeFormOrColor() 
@@ -98,6 +119,9 @@ public class SelectForm : MonoBehaviour
         }
         return true;
     }
+    //#refactor
+    //Можно же просто в качестве параметра использовать bool переменную)
+    //SelectBtn(bool isEven)
     public void SelectBtn(int numberBtn) 
     {
         bool isEven;
